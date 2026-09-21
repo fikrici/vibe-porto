@@ -1175,7 +1175,7 @@ button, input, textarea {
 
 .skills-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 28px;
 }
 
@@ -1217,49 +1217,134 @@ button, input, textarea {
   font-weight: 700;
 }
 
-.skill-items-list {
+/* Skill Icon Grid (replaces progress bars) */
+.skill-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.skill-icon-card {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-.skill-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.skill-info {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.skill-name {
-  color: var(--text-primary);
-}
-
-.skill-level {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--accent-cyan);
-}
-
-.skill-progress-bar {
-  width: 100%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: var(--radius-full);
+  align-items: center;
+  gap: 10px;
+  padding: 18px 10px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid transparent;
+  cursor: default;
+  transition: all var(--transition-normal);
+  position: relative;
   overflow: hidden;
 }
 
-.skill-progress-fill {
-  height: 100%;
-  border-radius: var(--radius-full);
-  background: var(--gradient-primary);
-  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+.skill-icon-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  z-index: 0;
 }
+
+.skill-icon-card[data-glow="cyan"]::before {
+  background: radial-gradient(circle at center, rgba(6, 182, 212, 0.12) 0%, transparent 70%);
+}
+
+.skill-icon-card[data-glow="indigo"]::before {
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+}
+
+.skill-icon-card[data-glow="purple"]::before {
+  background: radial-gradient(circle at center, rgba(168, 85, 247, 0.12) 0%, transparent 70%);
+}
+
+.skill-icon-card[data-glow="emerald"]::before {
+  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
+}
+
+.skill-icon-card:hover {
+  transform: translateY(-4px) scale(1.04);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.skill-icon-card:hover::before {
+  opacity: 1;
+}
+
+.skill-icon-card[data-glow="cyan"]:hover {
+  border-color: rgba(6, 182, 212, 0.35);
+  box-shadow: 0 0 24px -6px rgba(6, 182, 212, 0.25);
+}
+
+.skill-icon-card[data-glow="indigo"]:hover {
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 0 24px -6px rgba(99, 102, 241, 0.25);
+}
+
+.skill-icon-card[data-glow="purple"]:hover {
+  border-color: rgba(168, 85, 247, 0.35);
+  box-shadow: 0 0 24px -6px rgba(168, 85, 247, 0.25);
+}
+
+.skill-icon-card[data-glow="emerald"]:hover {
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 0 24px -6px rgba(16, 185, 129, 0.25);
+}
+
+.skill-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  transition: transform var(--transition-normal);
+}
+
+.skill-icon-card:hover .skill-icon-wrapper {
+  transform: scale(1.15);
+}
+
+.skill-icon-wrapper svg {
+  width: 32px;
+  height: 32px;
+}
+
+.skill-icon-card[data-glow="cyan"] .skill-icon-wrapper {
+  color: var(--accent-cyan);
+}
+
+.skill-icon-card[data-glow="indigo"] .skill-icon-wrapper {
+  color: var(--accent-indigo);
+}
+
+.skill-icon-card[data-glow="purple"] .skill-icon-wrapper {
+  color: var(--accent-purple);
+}
+
+.skill-icon-card[data-glow="emerald"] .skill-icon-wrapper {
+  color: var(--accent-emerald);
+}
+
+.skill-icon-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.3;
+  position: relative;
+  z-index: 1;
+  transition: color var(--transition-fast);
+}
+
+.skill-icon-card:hover .skill-icon-label {
+  color: var(--text-primary);
+}
+
 
 /* ==========================================================================
    Contact Section
@@ -1705,6 +1790,11 @@ button, input, textarea {
   .footer-inner {
     flex-direction: column;
     text-align: center;
+  }
+
+  .skill-icon-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 }
 
