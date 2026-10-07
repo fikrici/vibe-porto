@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Monitoring — kajoe</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root { --bg: #07090d; --card: #10141b; --card2: #161c26; --border: #1f2836; --txt: #e8edf3; --mut: #8b98a9; --green: #22c55e; --red: #ef4444; --amber: #f59e0b; --blue: #3b82f6; --purple: #8b5cf6; }
   body { font-family: -apple-system, 'Segoe UI', Roboto, 'Inter', sans-serif; background: var(--bg); color: var(--txt); min-height: 100vh; }
   .hero { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); padding: 36px 20px 28px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
   .hero::before { content: ""; position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(139,92,246,.25), transparent 70%); border-radius: 50%; }
-  .hero::after { content: ""; position: absolute; bottom: -80px; left: -40px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(59,130,246,.2), transparent 70%); border-radius: 50%; }
   .hero-inner { max-width: 760px; margin: 0 auto; position: relative; z-index: 1; }
   .hero h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
   .hero h1 .ai { background: linear-gradient(90deg, var(--blue), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -22,8 +22,7 @@
   .section-title { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--mut); font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
   .section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
   .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; transition: transform .15s, border-color .15s; }
-  .card:hover { transform: translateY(-2px); border-color: #2d3a4f; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
   .card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
   .dot.ok { background: var(--green); box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite; }
@@ -31,25 +30,33 @@
   .dot.warn { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
   .card-name { font-weight: 700; font-size: 15px; }
   .card-sub { color: var(--mut); font-size: 12px; margin-top: 2px; }
-  .card-foot { margin-top: 10px; display: flex; align-items: center; justify-content: space-between; }
-  .badge { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: .05em; }
+  .card-foot { margin-top: 10px; }
+  .badge { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: .05em; display: inline-block; }
   .badge.ok { color: var(--green); background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); }
   .badge.bad { color: var(--red); background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); }
   .badge.warn { color: var(--amber); background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.3); }
-  .badge.info { color: var(--blue); background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.3); }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
   .chip { font-size: 11px; background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 4px 10px; color: #a8b5c7; font-family: monospace; }
-  .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  /* Limit cards */
+  .limit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 500px) { .limit-grid { grid-template-columns: 1fr; } }
+  .limit-card { border-radius: 16px; padding: 18px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+  .limit-card.safe { background: linear-gradient(135deg, rgba(34,197,94,.08), var(--card)); }
+  .limit-card.hit { background: linear-gradient(135deg, rgba(245,158,11,.1), var(--card)); border-color: rgba(245,158,11,.35); }
+  .limit-card h3 { font-size: 16px; margin-bottom: 4px; }
+  .limit-card .big-status { font-size: 13px; font-weight: 700; margin: 8px 0; }
+  .limit-card .detail { font-size: 12px; color: var(--mut); line-height: 1.6; }
+  .limit-card .meaning { font-size: 12px; margin-top: 10px; padding: 10px; background: rgba(0,0,0,.25); border-radius: 10px; line-height: 1.5; }
+  /* Charts */
+  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 12px; }
+  .chart-card h3 { font-size: 14px; margin-bottom: 4px; }
+  .chart-card .csub { font-size: 12px; color: var(--mut); margin-bottom: 12px; }
+  .chart-wrap { position: relative; height: 180px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px; }
   @media (min-width: 600px) { .stat-grid { grid-template-columns: repeat(4, 1fr); } }
   .stat { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; text-align: center; }
   .stat .big { font-size: 26px; font-weight: 800; }
   .stat .lbl { font-size: 11px; color: var(--mut); text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
-  .stat .bar { height: 6px; background: var(--card2); border-radius: 3px; margin-top: 10px; overflow: hidden; }
-  .stat .bar > div { height: 100%; border-radius: 3px; transition: width .5s; }
-  .quota-card { background: linear-gradient(135deg, #1a1428, #141a28); border: 1px solid var(--border); border-radius: 16px; padding: 18px; display: flex; align-items: center; gap: 16px; }
-  .quota-num { font-size: 36px; font-weight: 800; }
-  .quota-num.clean { color: var(--green); } .quota-num.hit { color: var(--amber); }
-  .quota-desc { color: var(--mut); font-size: 13px; line-height: 1.5; }
   .foot { text-align: center; color: #4b586a; font-size: 12px; margin-top: 8px; }
   .loading { text-align: center; padding: 60px 0; color: var(--mut); }
   .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--purple); border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite; }
@@ -65,14 +72,24 @@
 <div class="foot">auto-refresh tiap menit · data diperbarui tiap 15 menit dari VPS</div></div>
 <script>
 var DATA_URL = "https://raw.githubusercontent.com/fikrici/vibe-porto/data/monitoring-data.json";
+var HIST_URL = "https://raw.githubusercontent.com/fikrici/vibe-porto/data/history.json";
+var charts = {};
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
-function badge(t,c){return '<span class="badge '+c+'">'+t+'</span>';}
+
+function limitCard(name, count, code, whatItMeans, tip){
+  var hit = count > 0;
+  return '<div class="limit-card '+(hit?"hit":"safe")+'"><h3>'+esc(name)+'</h3>'+
+    '<div class="big-status" style="color:'+(hit?"var(--amber)":"var(--green)")+'">'+(hit?"⚠ Kena limit "+count+"x":"✅ Aman")+'</div>'+
+    '<div class="detail">Kode: <b>'+code+'</b></div>'+
+    '<div class="meaning">💡 '+whatItMeans+'<br><br>🔧 '+tip+'</div></div>';
+}
+
 function render(d){
   document.getElementById("updated").textContent = "live · update " + d.updated_at;
   var h = "";
   h += '<div class="section"><div class="section-title">Layanan</div><div class="cards">';
   (d.services||[]).forEach(function(s){
-    h += '<div class="card"><div class="card-top"><span class="dot '+(s.running?"ok":"bad")+'"></span><div><div class="card-name">'+esc(s.name)+'</div></div></div><div class="card-foot">'+badge(s.running?"online":"offline",s.running?"ok":"bad")+'</div></div>';
+    h += '<div class="card"><div class="card-top"><span class="dot '+(s.running?"ok":"bad")+'"></span><div><div class="card-name">'+esc(s.name)+'</div></div></div><div class="card-foot"><span class="badge '+(s.running?"ok":"bad")+'">'+(s.running?"online":"offline")+'</span></div></div>';
   });
   h += '</div></div>';
   h += '<div class="section"><div class="section-title">Provider AI</div><div class="cards">';
@@ -80,21 +97,61 @@ function render(d){
     var ok = p.active && p.status==="active";
     h += '<div class="card"><div class="card-top"><span class="dot '+(ok?"ok":"warn")+'"></span><div><div class="card-name">'+esc(p.name)+'</div><div class="card-sub">prioritas '+p.priority+'</div></div></div>';
     if(p.models&&p.models.length){ h += '<div class="chips">'+p.models.slice(0,4).map(function(m){return '<span class="chip">'+esc(m)+'</span>';}).join("")+'</div>'; }
-    h += '<div class="card-foot">'+badge(ok?"aktif":"periksa",ok?"ok":"warn")+'</div></div>';
+    h += '<div class="card-foot"><span class="badge '+(ok?"ok":"warn")+'">'+(ok?"aktif":"periksa")+'</span></div></div>';
   });
   h += '</div></div>';
-  var q=d.quota_signals_24h||{}, qt=(q.gemini_429||0)+(q.groq_413||0);
-  h += '<div class="section"><div class="section-title">Limit 24 Jam Terakhir</div>';
-  h += '<div class="quota-card"><div class="quota-num '+(qt>0?"hit":"clean")+'">'+qt+'</div><div class="quota-desc">kali kena limit<br>Gemini 429: <b>'+(q.gemini_429||0)+'</b> · Groq 413: <b>'+(q.groq_413||0)+'</b></div></div></div>';
-  var s=d.system||{}, rc=s.ram_used_pct>90?"var(--red)":(s.ram_used_pct>75?"var(--amber)":"var(--green)");
-  h += '<div class="section"><div class="section-title">VPS</div><div class="stat-grid">';
-  h += '<div class="stat"><div class="big" style="color:'+rc+'">'+(s.ram_used_pct||"-")+'%</div><div class="lbl">RAM · '+(s.ram_available_mb||"-")+' MB sisa</div><div class="bar"><div style="width:'+(s.ram_used_pct||0)+'%;background:'+rc+'"></div></div></div>';
-  h += '<div class="stat"><div class="big">'+(s.disk_home_mb?(s.disk_home_mb/1024).toFixed(1):"-")+'</div><div class="lbl">GB disk home</div></div>';
-  h += '<div class="stat"><div class="big">'+(s.cpu_count||"-")+'</div><div class="lbl">CPU core · load '+(s.load_1m||"-")+'</div></div>';
+
+  var q=d.quota_signals_24h||{};
+  h += '<div class="section"><div class="section-title">Status Limit API</div><div class="limit-grid">';
+  h += limitCard("Gemini", q.gemini_429||0, "429 Quota Exceeded",
+    "Google membatasi pemakaian gratis. Kalau kena ini, AI nggak bisa jawab sampai kuota reset (biasanya harian).",
+    "Tunggu reset kuota, atau pakai Groq sebagai cadangan.");
+  h += limitCard("Groq", q.groq_413||0, "413 Request Too Large",
+    "Chat kepanjangan melebihi batas 8000 token/menit paket gratis Groq.",
+    "Mulai chat baru biar konteksnya kecil lagi.");
+  h += '</div></div>';
+
+  var s=d.system||{};
+  h += '<div class="section"><div class="section-title">VPS Saat Ini</div><div class="stat-grid">';
+  var rc=s.ram_used_pct>90?"var(--red)":(s.ram_used_pct>75?"var(--amber)":"var(--green)");
+  h += '<div class="stat"><div class="big" style="color:'+rc+'">'+(s.ram_used_pct||"-")+'%</div><div class="lbl">RAM · '+(s.ram_available_mb||"-")+' MB sisa</div></div>';
+  h += '<div class="stat"><div class="big">'+(s.disk_home_mb?(s.disk_home_mb/1024).toFixed(1):"-")+'</div><div class="lbl">GB disk</div></div>';
+  h += '<div class="stat"><div class="big">'+(s.cpu_count||"-")+'</div><div class="lbl">core · load '+(s.load_1m||"-")+'</div></div>';
   h += '<div class="stat"><div class="big">'+(s.uptime_hours||"-")+'</div><div class="lbl">jam uptime</div></div>';
   h += '</div></div>';
+
+  h += '<div class="section"><div class="section-title">Grafik 24 Jam</div>';
+  h += '<div class="chart-card"><h3>RAM Usage</h3><div class="csub">persen terpakai · tiap 15 menit</div><div class="chart-wrap"><canvas id="chRam"></canvas></div></div>';
+  h += '<div class="chart-card"><h3>Disk Usage</h3><div class="csub">GB · tiap 15 menit</div><div class="chart-wrap"><canvas id="chDisk"></canvas></div></div>';
+  h += '<div class="chart-card"><h3>CPU Load</h3><div class="csub">rata-rata 1 menit · tiap 15 menit</div><div class="chart-wrap"><canvas id="chLoad"></canvas></div></div>';
+  h += '</div>';
+
   document.getElementById("content").innerHTML = h;
+  loadHistory();
 }
+
+function mkChart(id, labels, data, color, suffix){
+  var el = document.getElementById(id);
+  if(!el || typeof Chart==="undefined") return;
+  if(charts[id]) charts[id].destroy();
+  charts[id] = new Chart(el, { type:"line",
+    data:{ labels:labels, datasets:[{ data:data, borderColor:color, backgroundColor:color+"22", fill:true, tension:.35, pointRadius:0, borderWidth:2 }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:function(c){return c.parsed.y+suffix;} } } },
+      scales:{ x:{ ticks:{ color:"#5b6b7a", maxTicksLimit:8, font:{size:10} }, grid:{ color:"#1a2230" } },
+               y:{ ticks:{ color:"#5b6b7a", font:{size:10} }, grid:{ color:"#1a2230" } } } } });
+}
+
+function loadHistory(){
+  fetch(HIST_URL+"?t="+Date.now()).then(function(r){return r.json();}).then(function(hist){
+    if(!hist||!hist.length) return;
+    var labels = hist.map(function(p){return p.t||"";});
+    mkChart("chRam", labels, hist.map(function(p){return p.ram;}), "#8b5cf6", "%");
+    mkChart("chDisk", labels, hist.map(function(p){return p.disk;}), "#3b82f6", " GB");
+    mkChart("chLoad", labels, hist.map(function(p){return p.load;}), "#22c55e", "");
+  }).catch(function(){});
+}
+
 function load(){fetch(DATA_URL+"?t="+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json();}).then(render).catch(function(){document.getElementById("content").innerHTML='<div class="loading">Gagal memuat. Coba refresh.</div>';});}
 load(); setInterval(load,60000);
 </script>
