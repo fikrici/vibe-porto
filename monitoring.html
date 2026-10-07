@@ -6,106 +6,97 @@
 <title>AI Monitoring — kajoe</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background: #0b0e13; color: #e7e9ea; padding: 24px 16px; min-height: 100vh; }
-  .wrap { max-width: 720px; margin: 0 auto; }
-  h1 { font-size: 22px; margin-bottom: 4px; }
-  .sub { color: #8b98a5; font-size: 13px; margin-bottom: 20px; }
-  .sub .live { color: #22c55e; }
-  .section { background: #141a23; border: 1px solid #232d3a; border-radius: 14px; padding: 18px; margin-bottom: 14px; }
-  .section h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: #8b98a5; margin-bottom: 12px; font-weight: 600; }
-  .row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1d2530; }
-  .row:last-child { border-bottom: none; }
-  .dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
-  .dot.ok { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
-  .dot.bad { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
-  .dot.warn { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
-  .name { font-weight: 600; font-size: 15px; }
-  .meta { color: #8b98a5; font-size: 12px; margin-top: 2px; }
-  .tag { margin-left: auto; font-size: 12px; padding: 3px 12px; border-radius: 20px; flex-shrink: 0; }
-  .tag.ok { color: #22c55e; background: rgba(34,197,94,.12); }
-  .tag.bad { color: #ef4444; background: rgba(239,68,68,.12); }
-  .tag.warn { color: #f59e0b; background: rgba(245,158,11,.12); }
-  .bar { height: 8px; background: #232d3a; border-radius: 4px; overflow: hidden; margin-top: 6px; }
-  .bar > div { height: 100%; border-radius: 4px; background: #22c55e; transition: width .5s; }
-  .bar > div.warn { background: #f59e0b; }
-  .bar > div.bad { background: #ef4444; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .stat { background: #1a222d; border-radius: 10px; padding: 12px; }
-  .stat .v { font-size: 20px; font-weight: 700; }
-  .stat .l { font-size: 12px; color: #8b98a5; margin-top: 2px; }
-  .err { text-align: center; color: #8b98a5; padding: 40px 0; }
-  .foot { text-align: center; color: #5b6b7a; font-size: 12px; margin-top: 16px; }
-  .models { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-  .model-chip { font-size: 11px; background: #1a222d; border: 1px solid #232d3a; border-radius: 12px; padding: 3px 10px; color: #a8b5c2; }
+  :root { --bg: #07090d; --card: #10141b; --card2: #161c26; --border: #1f2836; --txt: #e8edf3; --mut: #8b98a9; --green: #22c55e; --red: #ef4444; --amber: #f59e0b; --blue: #3b82f6; --purple: #8b5cf6; }
+  body { font-family: -apple-system, 'Segoe UI', Roboto, 'Inter', sans-serif; background: var(--bg); color: var(--txt); min-height: 100vh; }
+  .hero { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); padding: 36px 20px 28px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; background: radial-gradient(circle, rgba(139,92,246,.25), transparent 70%); border-radius: 50%; }
+  .hero::after { content: ""; position: absolute; bottom: -80px; left: -40px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(59,130,246,.2), transparent 70%); border-radius: 50%; }
+  .hero-inner { max-width: 760px; margin: 0 auto; position: relative; z-index: 1; }
+  .hero h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+  .hero h1 .ai { background: linear-gradient(90deg, var(--blue), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero .sub { color: var(--mut); font-size: 13px; margin-top: 8px; display: flex; align-items: center; gap: 8px; }
+  .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,.5); } 50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); } }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 20px 16px 40px; }
+  .section { margin-bottom: 22px; }
+  .section-title { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--mut); font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; transition: transform .15s, border-color .15s; }
+  .card:hover { transform: translateY(-2px); border-color: #2d3a4f; }
+  .card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .dot.ok { background: var(--green); box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite; }
+  .dot.bad { background: var(--red); box-shadow: 0 0 10px var(--red); }
+  .dot.warn { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
+  .card-name { font-weight: 700; font-size: 15px; }
+  .card-sub { color: var(--mut); font-size: 12px; margin-top: 2px; }
+  .card-foot { margin-top: 10px; display: flex; align-items: center; justify-content: space-between; }
+  .badge { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: .05em; }
+  .badge.ok { color: var(--green); background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); }
+  .badge.bad { color: var(--red); background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); }
+  .badge.warn { color: var(--amber); background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.3); }
+  .badge.info { color: var(--blue); background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.3); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip { font-size: 11px; background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 4px 10px; color: #a8b5c7; font-family: monospace; }
+  .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (min-width: 600px) { .stat-grid { grid-template-columns: repeat(4, 1fr); } }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; text-align: center; }
+  .stat .big { font-size: 26px; font-weight: 800; }
+  .stat .lbl { font-size: 11px; color: var(--mut); text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
+  .stat .bar { height: 6px; background: var(--card2); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+  .stat .bar > div { height: 100%; border-radius: 3px; transition: width .5s; }
+  .quota-card { background: linear-gradient(135deg, #1a1428, #141a28); border: 1px solid var(--border); border-radius: 16px; padding: 18px; display: flex; align-items: center; gap: 16px; }
+  .quota-num { font-size: 36px; font-weight: 800; }
+  .quota-num.clean { color: var(--green); } .quota-num.hit { color: var(--amber); }
+  .quota-desc { color: var(--mut); font-size: 13px; line-height: 1.5; }
+  .foot { text-align: center; color: #4b586a; font-size: 12px; margin-top: 8px; }
+  .loading { text-align: center; padding: 60px 0; color: var(--mut); }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--purple); border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>AI Monitoring</h1>
-  <div class="sub"><span class="live">●</span> <span id="updated">memuat…</span> · refresh otomatis tiap menit</div>
-  <div id="content"><div class="err">Memuat data…</div></div>
-  <div class="foot">auto-update tiap 15 menit dari VPS</div>
-</div>
+<div class="hero"><div class="hero-inner">
+  <h1><span class="ai">AI</span> Monitoring</h1>
+  <div class="sub"><span class="pulse"></span><span id="updated">menghubungkan…</span></div>
+</div></div>
+<div class="wrap"><div id="content"><div class="loading"><div class="spinner"></div>Memuat data…</div></div>
+<div class="foot">auto-refresh tiap menit · data diperbarui tiap 15 menit dari VPS</div></div>
 <script>
 var DATA_URL = "https://raw.githubusercontent.com/fikrici/vibe-porto/data/monitoring-data.json";
-
-function dot(cls) { return '<div class="dot ' + cls + '"></div>'; }
-function tag(txt, cls) { return '<div class="tag ' + cls + '">' + txt + '</div>'; }
-function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
-
-function render(d) {
-  document.getElementById("updated").textContent = "update " + d.updated_at;
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function badge(t,c){return '<span class="badge '+c+'">'+t+'</span>';}
+function render(d){
+  document.getElementById("updated").textContent = "live · update " + d.updated_at;
   var h = "";
-
-  h += '<div class="section"><h2>Layanan</h2>';
-  (d.services || []).forEach(function(s) {
-    h += '<div class="row">' + dot(s.running ? "ok" : "bad") +
-      '<div><div class="name">' + esc(s.name) + '</div></div>' +
-      tag(s.running ? "jalan" : "mati", s.running ? "ok" : "bad") + '</div>';
+  h += '<div class="section"><div class="section-title">Layanan</div><div class="cards">';
+  (d.services||[]).forEach(function(s){
+    h += '<div class="card"><div class="card-top"><span class="dot '+(s.running?"ok":"bad")+'"></span><div><div class="card-name">'+esc(s.name)+'</div></div></div><div class="card-foot">'+badge(s.running?"online":"offline",s.running?"ok":"bad")+'</div></div>';
   });
-  h += "</div>";
-
-  h += '<div class="section"><h2>Provider AI</h2>';
-  (d.providers || []).forEach(function(p) {
-    var ok = p.active && p.status === "active";
-    h += '<div class="row">' + dot(ok ? "ok" : "warn") +
-      '<div><div class="name">' + esc(p.name) + '</div>' +
-      '<div class="meta">prioritas ' + p.priority + ' · status: ' + esc(p.status || "-") + '</div>';
-    if (p.models && p.models.length) {
-      h += '<div class="models">' + p.models.map(function(m){ return '<span class="model-chip">' + esc(m) + '</span>'; }).join("") + '</div>';
-    }
-    h += '</div>' + tag(ok ? "aktif" : "cek", ok ? "ok" : "warn") + '</div>';
+  h += '</div></div>';
+  h += '<div class="section"><div class="section-title">Provider AI</div><div class="cards">';
+  (d.providers||[]).forEach(function(p){
+    var ok = p.active && p.status==="active";
+    h += '<div class="card"><div class="card-top"><span class="dot '+(ok?"ok":"warn")+'"></span><div><div class="card-name">'+esc(p.name)+'</div><div class="card-sub">prioritas '+p.priority+'</div></div></div>';
+    if(p.models&&p.models.length){ h += '<div class="chips">'+p.models.slice(0,4).map(function(m){return '<span class="chip">'+esc(m)+'</span>';}).join("")+'</div>'; }
+    h += '<div class="card-foot">'+badge(ok?"aktif":"periksa",ok?"ok":"warn")+'</div></div>';
   });
-  var q = d.quota_signals_24h || {};
-  var qTotal = (q.gemini_429 || 0) + (q.groq_413 || 0);
-  h += '<div class="row">' + dot(qTotal > 0 ? "warn" : "ok") +
-    '<div><div class="name">Sinyal limit 24 jam</div>' +
-    '<div class="meta">Gemini 429: ' + (q.gemini_429 || 0) + ' · Groq 413: ' + (q.groq_413 || 0) + '</div></div>' +
-    tag(qTotal > 0 ? qTotal + "x kena" : "bersih", qTotal > 0 ? "warn" : "ok") + '</div>';
-  h += "</div>";
-
-  var s = d.system || {};
-  var ramCls = s.ram_used_pct > 90 ? "bad" : (s.ram_used_pct > 75 ? "warn" : "");
-  h += '<div class="section"><h2>VPS</h2><div class="grid">';
-  h += '<div class="stat"><div class="v">' + (s.ram_used_pct || "-") + '%</div><div class="l">RAM (' + (s.ram_available_mb || "-") + ' MB sisa)</div><div class="bar"><div class="' + ramCls + '" style="width:' + (s.ram_used_pct || 0) + '%"></div></div></div>';
-  h += '<div class="stat"><div class="v">' + (s.disk_home_mb ? (s.disk_home_mb/1024).toFixed(1) + " GB" : "-") + '</div><div class="l">Disk home</div></div>';
-  h += '<div class="stat"><div class="v">' + (s.cpu_count || "-") + ' core</div><div class="l">load ' + (s.load_1m || "-") + '</div></div>';
-  h += '<div class="stat"><div class="v">' + (s.uptime_hours || "-") + ' jam</div><div class="l">uptime</div></div>';
-  h += "</div></div>";
-
+  h += '</div></div>';
+  var q=d.quota_signals_24h||{}, qt=(q.gemini_429||0)+(q.groq_413||0);
+  h += '<div class="section"><div class="section-title">Limit 24 Jam Terakhir</div>';
+  h += '<div class="quota-card"><div class="quota-num '+(qt>0?"hit":"clean")+'">'+qt+'</div><div class="quota-desc">kali kena limit<br>Gemini 429: <b>'+(q.gemini_429||0)+'</b> · Groq 413: <b>'+(q.groq_413||0)+'</b></div></div></div>';
+  var s=d.system||{}, rc=s.ram_used_pct>90?"var(--red)":(s.ram_used_pct>75?"var(--amber)":"var(--green)");
+  h += '<div class="section"><div class="section-title">VPS</div><div class="stat-grid">';
+  h += '<div class="stat"><div class="big" style="color:'+rc+'">'+(s.ram_used_pct||"-")+'%</div><div class="lbl">RAM · '+(s.ram_available_mb||"-")+' MB sisa</div><div class="bar"><div style="width:'+(s.ram_used_pct||0)+'%;background:'+rc+'"></div></div></div>';
+  h += '<div class="stat"><div class="big">'+(s.disk_home_mb?(s.disk_home_mb/1024).toFixed(1):"-")+'</div><div class="lbl">GB disk home</div></div>';
+  h += '<div class="stat"><div class="big">'+(s.cpu_count||"-")+'</div><div class="lbl">CPU core · load '+(s.load_1m||"-")+'</div></div>';
+  h += '<div class="stat"><div class="big">'+(s.uptime_hours||"-")+'</div><div class="lbl">jam uptime</div></div>';
+  h += '</div></div>';
   document.getElementById("content").innerHTML = h;
 }
-
-function load() {
-  fetch(DATA_URL + "?t=" + Date.now())
-    .then(function(r) { if (!r.ok) throw 0; return r.json(); })
-    .then(render)
-    .catch(function() {
-      document.getElementById("content").innerHTML = '<div class="err">Gagal memuat data. Coba refresh.</div>';
-    });
-}
-load();
-setInterval(load, 60000);
+function load(){fetch(DATA_URL+"?t="+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json();}).then(render).catch(function(){document.getElementById("content").innerHTML='<div class="loading">Gagal memuat. Coba refresh.</div>';});}
+load(); setInterval(load,60000);
 </script>
 </body>
 </html>
