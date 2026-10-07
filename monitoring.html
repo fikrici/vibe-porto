@@ -105,7 +105,7 @@ function render(d){
   h += '</div></div>';
 
   var s=d.system||{};
-  h += '<div class="section"><div class="section-title">Uptime</div><div class="cards"><div class="card"><div class="card-top"><span class="dot ok"></span><div><div class="card-name">'+(s.uptime_hours||"-")+" jam"+'</div><div class="card-sub">VPS uptime · "+(s.cpu_count||"-")+" core CPU</div></div></div></div></div></div>';
+  h += '<div class="section"><div class="section-title">Uptime</div><div class="cards"><div class="card"><div class="card-top"><span class="dot ok"></span><div><div class="card-name">' + (s.uptime_hours || "-") + ' jam</div><div class="card-sub">VPS uptime &middot; ' + (s.cpu_count || "-") + ' core CPU</div></div></div></div></div></div>';
 
   var diskPct = s.disk_home_mb ? Math.min(100, Math.round(s.disk_home_mb / 10240 * 100)) : 0;
   h += '<div class="section"><div class="section-title">Pemakaian VPS</div>';
