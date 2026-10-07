@@ -85,14 +85,17 @@ function render(d){
     h += '<div class="card"><div class="card-top"><span class="dot '+(s.running?"ok":"bad")+'"></span><div><div class="card-name">'+esc(s.name)+'</div></div></div><div class="card-foot"><span class="badge '+(s.running?"ok":"bad")+'">'+(s.running?"online":"offline")+'</span></div></div>';
   });
   h += '</div></div>';
-  h += '<div class="section"><div class="section-title">Provider AI</div><div class="cards">';
+  h += '<div class="section"><div class="section-title">9Router Providers</div>';
+  var modelsByProv = {};
+  (d.models||[]).forEach(function(m){ (modelsByProv[m.provider]=modelsByProv[m.provider]||[]).push(m); });
   (d.providers||[]).forEach(function(p){
     var ok = p.active && p.status==="active";
-    h += '<div class="card"><div class="card-top"><span class="dot '+(ok?"ok":"warn")+'"></span><div><div class="card-name">'+esc(p.name)+'</div><div class="card-sub">prioritas '+p.priority+'</div></div></div>';
-    if(p.models&&p.models.length){ h += '<div class="chips">'+p.models.slice(0,4).map(function(m){return '<span class="chip">'+esc(m)+'</span>';}).join("")+'</div>'; }
-    h += '<div class="card-foot"><span class="badge '+(ok?"ok":"warn")+'">'+(ok?"aktif":"periksa")+'</span></div></div>';
+    var ms = modelsByProv[p.provider]||[];
+    h += '<div class="card" style="margin-bottom:12px"><div class="card-top"><span class="dot '+(ok?"ok":"warn")+'"></span><div style="flex:1"><div class="card-name">'+esc(p.name)+'</div><div class="card-sub">prioritas '+p.priority+' &middot; '+ms.length+' model</div></div><span class="badge '+(ok?"ok":"warn")+'">'+(ok?"aktif":"periksa")+'</span></div>';
+    if(ms.length){ h += '<div class="chips">'+ms.map(function(m){return '<span class="chip" title="'+esc(m.full||"")+'">'+esc(m.name||m.model)+'</span>';}).join("")+'</div>'; }
+    h += '</div>';
   });
-  h += '</div></div>';
+  h += '</div>';
 
   var q=d.quota_signals_24h||{};
   h += '<div class="section"><div class="section-title">Status Limit API</div><div class="limit-grid">';
