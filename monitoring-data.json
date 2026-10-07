@@ -1,0 +1,47 @@
+{
+ "updated_at": "2026-10-08 02:48:55 WIB",
+ "updated_ts": 1791402535,
+ "services": [
+  {
+   "name": "Bot Telegram",
+   "running": true
+  },
+  {
+   "name": "9Router",
+   "running": true
+  },
+  {
+   "name": "Hermes CLI",
+   "running": true
+  }
+ ],
+ "providers": [
+  {
+   "provider": "gemini",
+   "name": "Gemini",
+   "active": true,
+   "status": "active",
+   "priority": 1
+  },
+  {
+   "provider": "groq",
+   "name": "Groq",
+   "active": true,
+   "status": "active",
+   "priority": 2
+  }
+ ],
+ "quota_signals_24h": {
+  "gemini_429": 70,
+  "groq_413": 30
+ },
+ "system": {
+  "ram_total_mb": 7935,
+  "ram_available_mb": 1374,
+  "ram_used_pct": 82.7,
+  "cpu_count": 2,
+  "disk_home_mb": 3677,
+  "load_1m": 1.08,
+  "uptime_hours": 1.5
+ }
+}
