@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Monitoring — kajoe</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root { --bg: #07090d; --card: #10141b; --card2: #161c26; --border: #1f2836; --txt: #e8edf3; --mut: #8b98a9; --green: #22c55e; --red: #ef4444; --amber: #f59e0b; --blue: #3b82f6; --purple: #8b5cf6; }
@@ -47,16 +46,12 @@
   .limit-card .big-status { font-size: 13px; font-weight: 700; margin: 8px 0; }
   .limit-card .detail { font-size: 12px; color: var(--mut); line-height: 1.6; }
   .limit-card .meaning { font-size: 12px; margin-top: 10px; padding: 10px; background: rgba(0,0,0,.25); border-radius: 10px; line-height: 1.5; }
-  /* Charts */
-  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 12px; }
-  .chart-card h3 { font-size: 14px; margin-bottom: 4px; }
-  .chart-card .csub { font-size: 12px; color: var(--mut); margin-bottom: 12px; }
-  .chart-wrap { position: relative; height: 180px; }
   .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px; }
   @media (min-width: 600px) { .stat-grid { grid-template-columns: repeat(4, 1fr); } }
   .stat { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; text-align: center; }
   .stat .big { font-size: 26px; font-weight: 800; }
   .stat .lbl { font-size: 11px; color: var(--mut); text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
+  .usage-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;margin-bottom:12px;}.usage-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}.usage-name{font-weight:700;font-size:14px;}.usage-pct{font-size:22px;font-weight:800;}.usage-sub{font-size:12px;color:var(--mut);margin-bottom:10px;}.usage-track{height:10px;background:var(--card2);border-radius:5px;overflow:hidden;}.usage-fill{height:100%;border-radius:5px;transition:width .5s;}
   .foot { text-align: center; color: #4b586a; font-size: 12px; margin-top: 8px; }
   .loading { text-align: center; padding: 60px 0; color: var(--mut); }
   .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--purple); border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite; }
@@ -72,8 +67,6 @@
 <div class="foot">auto-refresh tiap menit · data diperbarui tiap 15 menit dari VPS</div></div>
 <script>
 var DATA_URL = "https://raw.githubusercontent.com/fikrici/vibe-porto/data/monitoring-data.json";
-var HIST_URL = "https://raw.githubusercontent.com/fikrici/vibe-porto/data/history.json";
-var charts = {};
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
 
 function limitCard(name, count, code, whatItMeans, tip){
@@ -112,44 +105,20 @@ function render(d){
   h += '</div></div>';
 
   var s=d.system||{};
-  h += '<div class="section"><div class="section-title">VPS Saat Ini</div><div class="stat-grid">';
-  var rc=s.ram_used_pct>90?"var(--red)":(s.ram_used_pct>75?"var(--amber)":"var(--green)");
-  h += '<div class="stat"><div class="big" style="color:'+rc+'">'+(s.ram_used_pct||"-")+'%</div><div class="lbl">RAM · '+(s.ram_available_mb||"-")+' MB sisa</div></div>';
-  h += '<div class="stat"><div class="big">'+(s.disk_home_mb?(s.disk_home_mb/1024).toFixed(1):"-")+'</div><div class="lbl">GB disk</div></div>';
-  h += '<div class="stat"><div class="big">'+(s.cpu_count||"-")+'</div><div class="lbl">core · load '+(s.load_1m||"-")+'</div></div>';
-  h += '<div class="stat"><div class="big">'+(s.uptime_hours||"-")+'</div><div class="lbl">jam uptime</div></div>';
-  h += '</div></div>';
+  h += '<div class="section"><div class="section-title">Uptime</div><div class="cards"><div class="card"><div class="card-top"><span class="dot ok"></span><div><div class="card-name">'+(s.uptime_hours||"-")+" jam"+'</div><div class="card-sub">VPS uptime · "+(s.cpu_count||"-")+" core CPU</div></div></div></div></div></div>';
 
-  h += '<div class="section"><div class="section-title">Grafik 24 Jam</div>';
-  h += '<div class="chart-card"><h3>RAM Usage</h3><div class="csub">persen terpakai · tiap 15 menit</div><div class="chart-wrap"><canvas id="chRam"></canvas></div></div>';
-  h += '<div class="chart-card"><h3>Disk Usage</h3><div class="csub">GB · tiap 15 menit</div><div class="chart-wrap"><canvas id="chDisk"></canvas></div></div>';
-  h += '<div class="chart-card"><h3>CPU Load</h3><div class="csub">rata-rata 1 menit · tiap 15 menit</div><div class="chart-wrap"><canvas id="chLoad"></canvas></div></div>';
+  var diskPct = s.disk_home_mb ? Math.min(100, Math.round(s.disk_home_mb / 10240 * 100)) : 0;
+  h += '<div class="section"><div class="section-title">Pemakaian VPS</div>';
+  h += usageBar("RAM", s.ram_used_pct||0, (s.ram_available_mb||"-")+" MB sisa", s.ram_used_pct>90?"var(--red)":(s.ram_used_pct>75?"var(--amber)":"var(--green)"));
+  h += usageBar("Disk", diskPct, (s.disk_home_mb?(s.disk_home_mb/1024).toFixed(1):"-")+" GB terpakai", diskPct>90?"var(--red)":(diskPct>75?"var(--amber)":"var(--blue)"));
+  h += usageBar("CPU Load", Math.min(100,Math.round((s.load_1m||0)/(s.cpu_count||2)*100)), "load "+(s.load_1m||"-")+" / "+(s.cpu_count||"-")+" core", "var(--purple)");
   h += '</div>';
 
   document.getElementById("content").innerHTML = h;
-  loadHistory();
 }
 
-function mkChart(id, labels, data, color, suffix){
-  var el = document.getElementById(id);
-  if(!el || typeof Chart==="undefined") return;
-  if(charts[id]) charts[id].destroy();
-  charts[id] = new Chart(el, { type:"line",
-    data:{ labels:labels, datasets:[{ data:data, borderColor:color, backgroundColor:color+"22", fill:true, tension:.35, pointRadius:0, borderWidth:2 }]},
-    options:{ responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:function(c){return c.parsed.y+suffix;} } } },
-      scales:{ x:{ ticks:{ color:"#5b6b7a", maxTicksLimit:8, font:{size:10} }, grid:{ color:"#1a2230" } },
-               y:{ ticks:{ color:"#5b6b7a", font:{size:10} }, grid:{ color:"#1a2230" } } } } });
-}
-
-function loadHistory(){
-  fetch(HIST_URL+"?t="+Date.now()).then(function(r){return r.json();}).then(function(hist){
-    if(!hist||!hist.length) return;
-    var labels = hist.map(function(p){return p.t||"";});
-    mkChart("chRam", labels, hist.map(function(p){return p.ram;}), "#8b5cf6", "%");
-    mkChart("chDisk", labels, hist.map(function(p){return p.disk;}), "#3b82f6", " GB");
-    mkChart("chLoad", labels, hist.map(function(p){return p.load;}), "#22c55e", "");
-  }).catch(function(){});
+function usageBar(name, pct, sub, color){
+  return '<div class="usage-card"><div class="usage-top"><span class="usage-name">'+name+'</span><span class="usage-pct" style="color:'+color+'">'+pct+'%</span></div><div class="usage-sub">'+sub+'</div><div class="usage-track"><div class="usage-fill" style="width:'+Math.min(100,pct)+'%;background:'+color+'"></div></div></div>';
 }
 
 function load(){fetch(DATA_URL+"?t="+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json();}).then(render).catch(function(){document.getElementById("content").innerHTML='<div class="loading">Gagal memuat. Coba refresh.</div>';});}
