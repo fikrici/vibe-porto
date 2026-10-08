@@ -1,6 +1,6 @@
 {
- "updated_at": "2026-10-08 03:11:31 WIB",
- "updated_ts": 1791429091,
+ "updated_at": "2026-10-08 03:13:32 WIB",
+ "updated_ts": 1791429212,
  "services": [
   {
    "name": "Bot Telegram",
@@ -45,11 +45,11 @@
  },
  "system": {
   "ram_total_mb": 7935,
-  "ram_available_mb": 634,
-  "ram_used_pct": 92.0,
+  "ram_available_mb": 1025,
+  "ram_used_pct": 87.1,
   "cpu_count": 2,
   "disk_home_mb": 3705,
-  "load_1m": 0.26,
+  "load_1m": 0.63,
   "uptime_hours": 1.5
  }
 }
