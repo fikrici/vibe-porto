@@ -1,10 +1,10 @@
 {
- "updated_at": "2026-10-08 01:26:32 WIB",
- "updated_ts": 1791422792,
+ "updated_at": "2026-10-08 01:41:50 WIB",
+ "updated_ts": 1791423710,
  "services": [
   {
    "name": "Bot Telegram",
-   "running": true
+   "running": false
   },
   {
    "name": "9Router",
@@ -15,29 +15,7 @@
    "running": true
   }
  ],
- "providers": [
-  {
-   "provider": "gemini",
-   "name": "Gemini",
-   "active": true,
-   "status": "active",
-   "priority": 1
-  },
-  {
-   "provider": "antigravity",
-   "name": "fikritmvn@gmail.com",
-   "active": true,
-   "status": "active",
-   "priority": 1
-  },
-  {
-   "provider": "groq",
-   "name": "Groq",
-   "active": true,
-   "status": "active",
-   "priority": 2
-  }
- ],
+ "providers": [],
  "models": [],
  "quota_signals_24h": {
   "gemini_429": 70,
@@ -45,11 +23,11 @@
  },
  "system": {
   "ram_total_mb": 7935,
-  "ram_available_mb": 886,
-  "ram_used_pct": 88.8,
+  "ram_available_mb": 6483,
+  "ram_used_pct": 18.3,
   "cpu_count": 2,
-  "disk_home_mb": 3689,
-  "load_1m": 1.49,
-  "uptime_hours": 2.6
+  "disk_home_mb": 3687,
+  "load_1m": 3.64,
+  "uptime_hours": 0.0
  }
 }
